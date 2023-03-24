@@ -80,7 +80,7 @@ if uploaded_file is not None:
         st.write("Number of highschool who pass:", len(min_highschool_filtered))
         st.write(f"Pass ratio: {np.floor(len(filtered_data) / len(data) * 100)} %")
         st.write(f"Cut at: class >= {filtered_data['class_score'].min()} and quiz >= {filtered_data['quiz_score'].min()}")
-        
+        st.dataframe(filtered_data['specialty'].value_counts())
 else:
     data = pd.read_csv("data.csv")
     st.sidebar.header("Constraints")
@@ -119,3 +119,4 @@ else:
             st.write("Number of highschool who pass:", len(min_highschool_filtered))
             st.write(f"Pass ratio: {np.floor(len(filtered_data) / len(data) * 100)} %")
             st.write(f"Cut at: class >= {filtered_data['class_score'].min()} and quiz >= {filtered_data['quiz_score'].min()}")
+            st.dataframe(filtered_data['specialty'].value_counts())
