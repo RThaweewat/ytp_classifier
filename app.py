@@ -1,7 +1,41 @@
+import streamlit as st
 import pandas as pd
 import numpy as np
-from scipy.optimize import minimize
-import streamlit as st
+
+def filter_passing_candidates(data, class_threshold, quiz_threshold, min_class_score, min_quiz_score):
+    return data[
+        (data['class_score'] >= class_threshold) &
+        (data['quiz_score'] >= quiz_threshold) &
+        (data['class_score'] >= min_class_score) &
+        (data['quiz_score'] >= min_quiz_score)
+    ]
+
+def specialty_ratio_distance(filtered_data, min_specialty_ratio, use_specialty_threshold):
+    if not use_specialty_threshold:
+        return 0
+
+    specialty_counts = filtered_data['specialty'].value_counts()
+    total_pass = len(filtered_data)
+    specialty_ratios = specialty_counts / total_pass
+    min_specialty_ratios_series = pd.Series(min_specialty_ratio).reindex(specialty_ratios.index, fill_value=0)
+    distance = ((specialty_ratios - min_specialty_ratios_series) ** 2).sum() ** 0.5
+    return distance
+
+def find_optimal_thresholds(data, min_total_pass, max_total_pass, min_highschool, min_specialty_ratio, use_specialty_threshold, min_class_score, min_quiz_score):
+    best_thresholds = None
+    best_distance = float("inf")
+    for class_threshold in range(1, 16):
+        for quiz_threshold in range(1, 12):
+            filtered_data = filter_passing_candidates(data, class_threshold, quiz_threshold, min_class_score, min_quiz_score)
+            total_pass = len(filtered_data)
+            highschool_pass = sum(filtered_data['is_highschool'] == 1)
+            if total_pass < min_total_pass or total_pass > max_total_pass or highschool_pass < min_highschool:
+                continue
+            distance = specialty_ratio_distance(filtered_data, min_specialty_ratio, use_specialty_threshold)
+            if distance < best_distance:
+                best_thresholds = (class_threshold, quiz_threshold)
+                best_distance = distance
+    return best_thresholds
 
 st.title("Internship Program Classifier")
 st.write("Upload your data in CSV format:")
