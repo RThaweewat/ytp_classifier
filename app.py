@@ -63,7 +63,10 @@ if uploaded_file is not None:
             data, min_total_pass, max_total_pass, min_highschool, min_specialty_ratio, use_specialty_threshold, min_class_score, min_quiz_score
         )
 
-        filtered_data = filter_passing_candidates(data, *optimal_thresholds, min_class_score, min_quiz_score)
+        if optimal_thresholds is None:
+            st.error("Impossible to find threshold from the current constraints. Please adjust the constraints and try again.")
+        else:
+            filtered_data = filter_passing_candidates(data, *optimal_thresholds, min_class_score, min_quiz_score)
 
         specialty_counts = filtered_data['specialty'].value_counts()
         total_pass = len(filtered_data)
@@ -99,18 +102,20 @@ else:
             data, min_total_pass, max_total_pass, min_highschool, min_specialty_ratio, use_specialty_threshold, min_class_score, min_quiz_score
         )
 
-        filtered_data = filter_passing_candidates(data, *optimal_thresholds, min_class_score, min_quiz_score)
+        if optimal_thresholds is None:
+            st.error("Impossible to find threshold from the current constraints. Please adjust the constraints and try again.")
+        else:
+            filtered_data = filter_passing_candidates(data, *optimal_thresholds, min_class_score, min_quiz_score)
+        
+            specialty_counts = filtered_data['specialty'].value_counts()
+            total_pass = len(filtered_data)
+            specialty_ratios = (specialty_counts / total_pass).to_dict()
+            min_highschool_filtered = filtered_data.query("is_highschool == 1")
 
-        specialty_counts = filtered_data['specialty'].value_counts()
-        total_pass = len(filtered_data)
-        specialty_ratios = (specialty_counts / total_pass).to_dict()
-        min_highschool_filtered = filtered_data.query("is_highschool == 1")
-
-        st.subheader("Results")
-        st.write("Optimal thresholds (Without constraints) :", optimal_thresholds)
-        st.write("Specialty ratios:", specialty_ratios)
-        st.write("Number of people who pass:", len(filtered_data))
-        st.write("Number of highschool who pass:", len(min_highschool_filtered))
-        st.write(f"Pass ratio: {np.floor(len(filtered_data) / len(data) * 100)} %")
-        st.write(f"Cut at: class >= {filtered_data['class_score'].min()} and quiz >= {filtered_data['quiz_score'].min()}")
-    
+            st.subheader("Results")
+            st.write("Optimal thresholds (Without constraints) :", optimal_thresholds)
+            st.write("Specialty ratios:", specialty_ratios)
+            st.write("Number of people who pass:", len(filtered_data))
+            st.write("Number of highschool who pass:", len(min_highschool_filtered))
+            st.write(f"Pass ratio: {np.floor(len(filtered_data) / len(data) * 100)} %")
+            st.write(f"Cut at: class >= {filtered_data['class_score'].min()} and quiz >= {filtered_data['quiz_score'].min()}")
