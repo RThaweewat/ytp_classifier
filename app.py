@@ -37,7 +37,7 @@ def find_optimal_thresholds(data, min_total_pass, max_total_pass, min_highschool
                 best_distance = distance
     return best_thresholds
 
-st.title("Internship Program Classifier")
+st.title("Candidates Threshold Optimizer")
 st.write("Upload your data in CSV format:")
 uploaded_file = st.file_uploader("", type=["csv"])
 
